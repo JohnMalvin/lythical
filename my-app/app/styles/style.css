@@ -1,0 +1,64 @@
+/* AUTH [SignIn, SignUp] EXTENSION CSS */
+.input-group {
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: fit-content;
+    margin: 20px 0;
+}
+
+.input-label {
+    font-size: 24px;
+    color: var(--highlight);
+    margin-bottom: 5px;
+}
+
+.input-box {
+    outline: 0.2px solid rgba(255, 255, 255, 0.2);
+    border-radius: 3px;
+    background-color: var(--shades);
+    height: 35px;
+    padding-left: 10px;
+    width: 100%;
+}
+
+.input-box:hover,
+.input-box:focus {
+    outline: 2px solid var(--lime);
+}
+
+.sign-up-form,
+.sign-up-link {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+}
+
+.sign-up-form::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at -30% 140%,
+            var(--purple),
+            transparent 60%),
+        radial-gradient(circle at 100% 0%,
+            var(--lime),
+            transparent 60%);
+    opacity: 0.2;
+    z-index: -1;
+    pointer-events: none;
+}
+
+.sign-up-link::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background:
+        radial-gradient(circle at -20% 100%,
+            var(--purple),
+            transparent 60%);
+    opacity: 0.2;
+    z-index: -1;
+    pointer-events: none;
+}
