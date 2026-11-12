@@ -3,7 +3,6 @@
 import "../styles/style.css"
 import Image from "next/image"
 import verified from "../../public/verified.svg"
-// "../../public/verify.svg"
 import { useEffect, useState } from "react"
 
 export default function CreateProject() {
