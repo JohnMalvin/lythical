@@ -1,23 +1,38 @@
-import mongoose, { Schema, model, models } from "mongoose";
 
-const userSchema = new Schema({
+import { Schema, model, models, HydratedDocument } from "mongoose";
+
+export interface IUser {
+  email: string;
+  password: string;
+  username: string;
+}
+
+export type IPublicUser = {
+  id: string;
+  username: string;
+  email: string;
+};
+
+export type UserDocument = HydratedDocument<IUser>;
+
+const userSchema = new Schema<IUser>({
   email: {
     type: String,
     required: true,
     unique: true,
-    lowercase: true,
-    trim: true,
   },
   password: {
     type: String,
     required: true,
-    select: false
+    select: false,
   },
-  firstName: {
+  username: {
     type: String,
     required: true,
     trim: true,
   }
-})
-const User = model("User", userSchema)
-export default User
+});
+
+const User = models.User || model<IUser>("User", userSchema);
+
+export default User;
