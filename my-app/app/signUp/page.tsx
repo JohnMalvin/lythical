@@ -4,10 +4,34 @@ import Image from "next/image"
 
 import viewPassword from "../../public/viewPass.svg"
 import hidePassword from "../../public/hidePass.svg"
-import { useState } from "react";
+import { useState, useRef } from "react";
+import { signUpZod } from "@/lib/zod";
 export default function SignUp() {
     const [viewPass, setViewPass] = useState<boolean>(false);
+    const [showError, setShowError] = useState<boolean>(false);
+    const [errorContent, setErrorContent] = useState<String>("");
 
+    const usernameRef = useRef<HTMLInputElement>(null);
+    const emailRef = useRef<HTMLInputElement>(null);
+    const passwordRef = useRef<HTMLInputElement>(null);
+
+    const handleSignUp = () => {
+        const result = signUpZod.safeParse({
+            username: usernameRef.current?.value,
+            email: emailRef.current?.value,
+            password: passwordRef.current?.value
+        });
+
+        if (!result.success) {
+            setShowError(true);
+            const errorMessage = Object.values(result.error.flatten().fieldErrors).flat()[0]; console.log(errorMessage);
+            setErrorContent(errorMessage);
+            return;
+        }
+        setShowError(false);
+
+        const { username, email, password } = result.data;
+    }
     return (
         <main className="sign-up-main-container w-screen h-screen flex items-center justify-center">
             <div className="sign-up-group w-[80%] max-w-200 lg:max-w-300 min-w-80 md:min-w-150 max-h-min flex flex-col gap-2.5">
@@ -17,16 +41,16 @@ export default function SignUp() {
                         <div className="sign-up-form flex-1 rounded-[10px] p-5 pt-10 shadow-[10px_10px_15px_var(--background)]">
                             <div className="input-group">
                                 <label className="input-label">Username</label>
-                                <input type="text" className="input-box"></input>
+                                <input ref={usernameRef} type="text" className="input-box"></input>
                             </div>
                             <div className="input-group">
                                 <label className="input-label">Email</label>
-                                <input type="text" className="input-box"></input>
+                                <input ref={emailRef} type="text" className="input-box"></input>
                             </div>
                             <div className="input-group">
                                 <label className="input-label">Password</label>
                                 <div className="password-input flex">
-                                    <input type={viewPass ? "text" : "password"} className="input-box"></input>
+                                    <input ref={passwordRef} type={viewPass ? "text" : "password"} className="input-box"></input>
                                     <button
                                         className="view-password bg-(--purple) h-8.75 w-8.75 flex items-center justify-center ml-2.5 shrink-0 rounded-[3px] cursor-pointer"
                                         onClick={() => setViewPass(!viewPass)}
@@ -40,7 +64,12 @@ export default function SignUp() {
                                     </button>
                                 </div>
                             </div>
-                            <button type="submit" className="input-submit bg-(--lime) w-full text-(--background) font-bold rounded-[3px] min-h-12 my-5 cursor-pointer">Sign Up</button>
+                            <p className={`text-(--purple) text-center ${showError ? "block" : "hidden"}`}>{errorContent + "*"}</p>
+                            <button
+                                type="submit"
+                                className="input-submit bg-(--lime) w-full text-(--background) font-bold rounded-[3px] min-h-12 my-5 cursor-pointer"
+                                onClick={handleSignUp}
+                            >Sign Up</button>
                         </div>
                         <div className="sign-up-link p-5 text-center text-(--highlight) rounded-[10px] mt-5 shadow-[10px_10px_15px_var(--background)]">
                             Already have an account? <a className="text-(--purple) cursor-pointer">Sign In</a>
