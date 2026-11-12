@@ -2,7 +2,7 @@
 
 import "../styles/style.css"
 import Image from "next/image"
-import verified from "../../public/verify.svg"
+import verified from "../../public/verified.svg"
 // "../../public/verify.svg"
 import { useEffect, useState } from "react"
 
@@ -58,12 +58,12 @@ export default function CreateProject() {
                                             <label className="text-(--lime)"> Name your project</label>
                                             <div className="flex items-center gap-2">
                                                 <input className="input-box"></input>
-                                                <div className="h-7 bg-(--purple) aspect-square flex items-center justify-center rounded-4xl">
+                                                <div className="h-7  aspect-square flex items-center justify-center rounded-4xl">
                                                     <Image
                                                         src={verified}
                                                         alt="view password"
-                                                        width={20}
-                                                        height={20}
+                                                        width={35}
+                                                        height={35}
                                                     ></Image>
                                                 </div>
                                             </div>
