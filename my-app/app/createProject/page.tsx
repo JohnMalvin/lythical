@@ -2,7 +2,8 @@
 
 import "../styles/style.css"
 import Image from "next/image"
-import verified from "../../public/globe.svg"
+import verified from "../../public/verify.svg"
+// "../../public/verify.svg"
 import { useEffect, useState } from "react"
 
 export default function CreateProject() {

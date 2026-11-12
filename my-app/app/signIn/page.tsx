@@ -1,7 +1,7 @@
 import "../styles/style.css"
 import Image from "next/image"
 
-import viewPassword from "../../public/globe.svg"
+import viewPassword from "../../public/verify.svg"
 export default function SignIn() {
 
   return (
