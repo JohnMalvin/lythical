@@ -1,29 +1,52 @@
 import { NextResponse } from "next/server";
 import transporter from "@/lib/mailer";
 import { generateVerificationCode } from "@/lib/helperFunctions";
+import VerificationCode from "@/models/VerificationCode";
+import { emailZod, verificationCodeZod } from "@/lib/zod";
+import { connectDB } from "@/lib/mongodb";
 
-export async function GET() {
+export async function POST(req: Request) {
     try {
-        await transporter.verify();
-        const emailSent = await handleVerificationCode(
-            "johnmalvinlim@gmail.com"
-        );
+        await connectDB();
+
+        const body = await req.json();
+        const result = emailZod.safeParse(body);
+
+        if (!result.success) {
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Invalid email address.",
+                },
+                { status: 400 }
+            );
+        }
+
+        const { email } = result.data;
+
+        const emailSent = await handleVerificationCode(email);
 
         if (!emailSent) {
-            throw new Error("Failed to send verification email.");
+            return NextResponse.json(
+                {
+                    success: false,
+                    message: "Failed to send verification email.",
+                },
+                { status: 500 }
+            );
         }
 
         return NextResponse.json({
             success: true,
-            message: "SMTP connection successful!",
+            message: "Verification code sent successfully.",
         });
     } catch (error) {
-        console.error("SMTP Error:", error);
+        console.error("Verification email error:", error);
 
         return NextResponse.json(
             {
                 success: false,
-                message: "SMTP connection failed.",
+                message: "Something went wrong.",
             },
             { status: 500 }
         );
@@ -31,7 +54,8 @@ export async function GET() {
 }
 
 async function handleVerificationCode(emailAddress: string) {
-    const code = generateVerificationCode();
+    const vCode = await createVerificationCode(emailAddress);
+    const code = vCode.code;
 
     try {
         const info = await transporter.sendMail({
@@ -196,7 +220,7 @@ async function handleVerificationCode(emailAddress: string) {
                                             ">
                                                 This code will expire in
                                                 <strong style="color: #ffffff;">
-                                                    10 minutes
+                                                    05 minutes
                                                 </strong>.
                                                 Please do not share it with anyone.
                                             </p>
@@ -280,4 +304,27 @@ async function handleVerificationCode(emailAddress: string) {
         console.error("Failed to send verification email:", error);
         return false;
     }
+}
+
+
+async function createVerificationCode(email: string) {
+    const code = generateVerificationCode();
+
+    const vCode = await VerificationCode.findOneAndUpdate(
+        { email },
+        {
+            $set: {
+                code,
+                verified: false,
+                expiresAt: new Date(Date.now() + 5 * 60 * 1000),
+            },
+        },
+        {
+            upsert: true,
+            new: true,
+            runValidators: true,
+        }
+    );
+
+    return vCode;
 }

@@ -37,3 +37,11 @@ export const signUpZod = z.object({
 
 });
 export type SignUpZod = z.infer<typeof signUpZod>;
+
+export const verificationCodeZod = z.object({
+    email: z.email(),
+    code: z.string().length(6).regex(/^\d{6}$/)
+});
+export const emailZod = z.object({
+    email: z.email()
+});

@@ -20,6 +20,8 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: true,
     unique: true,
+    lowercase: true,
+    trim: true
   },
   password: {
     type: String,
@@ -30,6 +32,7 @@ const userSchema = new Schema<IUser>({
     type: String,
     required: true,
     trim: true,
+    unique: true
   }
 });
 

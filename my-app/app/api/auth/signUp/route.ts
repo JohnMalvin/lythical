@@ -5,6 +5,8 @@ import User, { IPublicUser } from "@/models/User";
 import bcrypt from "bcryptjs";
 import { SignUpZod, signUpZod } from "@/lib/zod";
 import { config } from "@/lib/config";
+import VerificationCode from "@/models/VerificationCode";
+import mongoose from "mongoose";
 
 export async function POST(request: Request) {
     try {
@@ -50,34 +52,66 @@ export async function POST(request: Request) {
 async function handleSignUp(data: SignUpZod): Promise<Result<IPublicUser>> {
     await connectDB();
 
-    const existingUser = await User.findOne({
-        $or: [
-            { username: data.username },
-            { email: data.email }
-        ]
-    }).lean();
+    const session = await mongoose.startSession();
 
-    if (existingUser) {
-        return {
-            success: false,
-            error: "Username or email already exists"
-        };
-    }
-
+    const email = data.email.trim().toLowerCase();
     const hashedPassword = await bcrypt.hash(data.password, config.bcrypt.saltRounds);
 
-    const user = await User.create({
-        username: data.username,
-        email: data.email,
-        password: hashedPassword
-    });
-
-    return {
-        success: true,
-        data: {
-            id: user._id.toString(),
-            username: user.username,
-            email: user.email
-        }
+    let result: Result<IPublicUser> = {
+        success: false,
+        error: "Signup failed"
     };
+
+    try {
+        await session.withTransaction(async () => {
+            const existingUser = await User.findOne({
+                $or: [
+                    { username: data.username },
+                    { email }
+                ]
+            }).session(session).lean();
+
+            if (existingUser) {
+                result = {
+                    success: false,
+                    error: "Username or email already exists"
+                };
+                return;
+            }
+
+            const verification = await VerificationCode.findOneAndDelete({
+                email,
+                verified: true,
+                expiresAt: { $gt: new Date() }
+            }).session(session);
+
+            if (!verification) {
+                result = {
+                    success: false,
+                    error: "Email has not been verified"
+                };
+                return;
+            }
+
+            const [user] = await User.create([{
+                username: data.username,
+                email,
+                password: hashedPassword
+            }], { session });
+
+            result = {
+                success: true,
+                data: {
+                    id: user._id.toString(),
+                    username: user.username,
+                    email: user.email
+                }
+            };
+        });
+
+        return result;
+
+    } finally {
+        await session.endSession();
+    }
 }
