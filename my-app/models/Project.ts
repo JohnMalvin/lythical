@@ -1,13 +1,26 @@
-import mongoose, { Schema, model, models } from "mongoose";
+import { Schema, model } from "mongoose";
 
-const projectSchema = new Schema({
+export interface IProject {
+  owner: string;
+  projectName: string;
+  projectKey: string;
+  description: string;
+}
+// Owner type previously Schema.Types.ObjectId
+export type IPublicProject = {
+  owner: string;
+  projectName: string;
+  description: string;
+};
+
+const projectSchema = new Schema<IProject>({
   projectName: {
     type: String,
     required: true,
     trim: true,
   },
-  Owner: {
-    type: Schema.Types.ObjectId,
+  owner: {
+    type: String,
     ref: "User",
     required: true,
   },
