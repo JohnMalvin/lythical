@@ -45,3 +45,24 @@ export const verificationCodeZod = z.object({
 export const emailZod = z.object({
     email: z.email()
 });
+
+export const createProjectZod = z.object({
+  title: z
+    .string()
+    .trim()
+    .min(1, "Title is required")
+    .max(100, "Title must not exceed 100 characters"),
+
+  description: z
+    .string()
+    .trim()
+    .min(1, "Post can't be empty")
+    .max(5000, "Post must not exceed 5000 characters"),
+
+  language: z
+    .string()
+    .trim()
+    .min(1, "Language can't be empty")
+    .max(5000, "Language must not exceed 5000 characters"),
+});
+export type CreateProjectZod = z.infer<typeof createProjectZod>;
