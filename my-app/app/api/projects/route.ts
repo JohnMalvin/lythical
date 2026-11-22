@@ -60,10 +60,8 @@ async function handleCreateProject(data: CreateProjectZod, email: string): Promi
   await connectDB();
 
 	const existingProject = await Project.findOne({
-		$or: [
-			{ owner : email },
-			{ projectName: data.title }
-		]
+		owner: email,
+  	projectName: data.title,
 	}).lean();
 
 	if (existingProject) {
